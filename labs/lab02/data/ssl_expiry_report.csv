@@ -1,0 +1,9 @@
+Domain,Issuer,DaysLeft,Status,SignatureAlg
+ok.example.invalid,Let's Encrypt,20,WARNING,sha256WithRSAEncryption
+soon.example.invalid,Let's Encrypt,-30,EXPIRED,sha256WithRSAEncryption
+expired.example.invalid,DigiCert,-50,EXPIRED,sha256WithRSAEncryption
+weak-sha1.example.invalid,Legacy CA,53,WARNING,sha1WithRSAEncryption
+weak-md5.example.invalid,Legacy CA,84,OK,md5WithRSAEncryption
+ecdsa.example.invalid,Sectigo,22,WARNING,ecdsa-with-SHA256
+warning-edge.example.invalid,DigiCert,-13,EXPIRED,sha256WithRSAEncryption
+later.example.invalid,Sectigo,296,OK,sha384WithRSAEncryption

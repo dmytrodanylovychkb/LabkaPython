@@ -3,7 +3,7 @@ import hashlib
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import wraps
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
@@ -37,9 +37,7 @@ def log_event(func):
                 "event": "login",
                 "user": username,
                 "result": result_status,
-                "timestamp": datetime.now(datetime.timezone.utc).strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                ),
+                "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
                 "args": list(args[1:]),
                 "kwargs": kwargs,
             }
@@ -106,7 +104,7 @@ def read_users_db() -> list:
             for row in reader:
                 if row:
                     users_db.append((row[0], row[1]))
-    except FileNotFoundError:
+    except (OSError, PermissionError):
         print("[Попередження]: Файл бази даних ще не створено.")
     return users_db
 
@@ -124,6 +122,29 @@ def login(username: str, password: str) -> bool:
         if db_user == username and db_hash == input_hash:
             return True
     return False
+
+
+print("\nТестування входу в систему:")
+
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+users_db = [("admin_user", hash_password("SecurePass123!"))]
+
+for u, p in [
+    ("admin_user", "SecurePass123!"),
+    ("admin_user", "WrongPassword!"),
+    ("", "SecurePass123!"),
+    ("admin_user", "short"),
+]:
+    try:
+        print(f"Вхід {u} ({p}):", login(u, p, users_db))
+    except (ValueError, ValidationError) as e:
+        print(f"Очікуваний виняток: {e}")
+    except Exception as e:  # noqa: BLE001
+        print("Помилка:", e)
 
 
 def run_task3():
@@ -149,33 +170,6 @@ def run_task3():
     print("-" * 65)
     for u, h in db:
         print(f"{u:<20} | {h}")
-
-    print("\nТестування входу в систему:")
-    try:
-        print(
-            "Вхід admin_user (правильний пароль):",
-            login("admin_user", "SecurePass123!"),
-        )
-    except Exception as e:  # noqa: BLE001
-        print("Помилка:", e)
-
-    try:
-        print(
-            "Вхід admin_user (неправильний пароль):",
-            login("admin_user", "WrongPassword!"),
-        )
-    except Exception as e:  # noqa: BLE001
-        print("Помилка:", e)
-
-    try:
-        login("", "SecurePass123!")
-    except ValueError as e:
-        print("Очікуваний виняток ValueError спіймано:", e)
-
-    try:
-        login("admin_user", "short")
-    except ValidationError as e:
-        print("Очікуваний виняток ValidationError спіймано:", e)
 
 
 if __name__ == "__main__":
